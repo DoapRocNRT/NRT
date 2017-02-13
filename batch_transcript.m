@@ -2,7 +2,8 @@
 tab = sprintf('\t');
 formatSpec = '%s';
 extension = '.cha';
-story = 'Sandwich'; % exactly as it appears in the transcripts
+story = 'Sandwich';
+story2 = 'Sandwich_Picture'; % exactly as it appears in the transcripts
 
 %% BATCH SCRIPT
 % select directory containing both the aphasia and control folders
@@ -16,6 +17,7 @@ subDirs(strncmp('.', {subDirs.name}, 1)) = []; % remove hidden directories
 subDirs(~[subDirs(:).isdir]) = [];
 subDirs(strcmp({subDirs.name}, 'Sandwich')) = [];
 subDirs(strcmp({subDirs.name}, 'Cinderella')) = [];
+subDirs(strcmp({subDirs.name}, 'Sandwich_Picture')) = [];
 
 if ~exist(story, 'dir')
     mkdir(story); % create a folder with the same name as the story for outputting the files into
@@ -53,6 +55,7 @@ for group = 1:length(subDirs)
             outputFile = fopen([outputFileDir, '/', fileList(file).name(1:end-4), '_', story, extension], 'w');
             
             storyTitle = ['@G:', tab, story];
+            storyTitle2 = ['@G:', tab, story2];
             
             overallStoryFound = 0;
             storyFound = 0;
@@ -60,7 +63,7 @@ for group = 1:length(subDirs)
             %if it doesn't start with a * or a % or a @, it needs to be indented
             for len = 1:length(text{1})
                 line = text{1}{len};
-                if(strcmp(line,storyTitle)) %if we are at the story title, print it
+                if(strcmp(line,storyTitle) || strcmp(line,storyTitle2)) %if we are at the story title, print it
                    fprintf(outputFile, '%s\n',line); 
                    storyFound = 1;
                    overallStoryFound = 1;
