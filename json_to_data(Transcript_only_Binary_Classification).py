@@ -155,7 +155,7 @@ data2 = np.asarray(smor) # morpheme feature
 data3 = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH) # word feature
 labels = to_categorical(np.asarray(slab)) # Labels: Aphasia or Control
 
-#Tensor Shape: (910,800)
+#Feature tensor shape: (910,800); Label tensor shape: (910,2).
 print('Shape of data tensor:', data1.shape)
 print('Shape of data tensor:', data2.shape)
 print('Shape of data tensor:', data3.shape)
