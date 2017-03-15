@@ -160,3 +160,8 @@ print('Shape of data tensor:', data1.shape)
 print('Shape of data tensor:', data2.shape)
 print('Shape of data tensor:', data3.shape)
 print('Shape of label tensor:', labels.shape)  
+
+#Save data as numpy array
+np.save('grammar_feature',data1)
+np.save('morpheme_feature',data2)
+np.save('word_feature',data3)
