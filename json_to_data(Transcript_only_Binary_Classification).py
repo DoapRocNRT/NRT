@@ -82,12 +82,9 @@ def wrd_seq(x):
 def asc(y):
 	for s in y:
 		for t in s:
-		
 			try:
 				t.encode("ascii")
-
 			except UnicodeEncodeError:
-
 				s.pop(s.index(t))
 
 
@@ -110,9 +107,7 @@ swrd=[x for x in swrd if len(x)<=800]
 
 
 max_len_wrd=0
-his=[]
 for x in swrd:
-    his.append(len(x))
     if len(x)>max_len_wrd:
         max_len_wrd=len(x)
 
@@ -129,7 +124,6 @@ def wrd_seq(x):
 
 	
 swrd=list(map(wrd_seq,swrd))
-
 
 swrd =[s.encode('ascii') for s in swrd]
 
@@ -161,7 +155,7 @@ data2 = np.asarray(smor) # morpheme feature
 data3 = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH) # word feature
 labels = to_categorical(np.asarray(slab)) # Labels: Aphasia or Control
 
-
+#Tensor Shape: (910,800)
 print('Shape of data tensor:', data1.shape)
 print('Shape of data tensor:', data2.shape)
 print('Shape of data tensor:', data3.shape)
