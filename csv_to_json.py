@@ -48,3 +48,47 @@ with open('Apha_sand.json','w') as dic:
 with open('Apha_sand_lab.json','w') as lab:
     json.dump(lab_dict,lab)
 
+# Store dictionaries for subject sex and timestamps of both tasks per subject
+path='C:/Users/weilun/Desktop/NRT_Practicum/Data/timestamps/csv'
+os.chdir(path)
+ts=['control_cinderella.csv','aphasia_cinderella.csv','aphasia_sandwich.csv','control_sandwich.csv']
+
+for l in ts:
+    
+    ts_dict=collections.defaultdict()
+        
+    py=open(l)
+    ap=list(csv.reader(py))
+    
+    for i in range(1,len(ap)):
+        ts_dict[ap[i][0][:-4]]=ap[i][3:]
+    
+    with open(l[:-4]+'.json','w') as dic:
+        json.dump(ts_dict,dic)
+        
+        
+        
+
+sex_dict=collections.defaultdict()
+
+path='C:/Users/weilun/Desktop'
+os.chdir(path)
+
+sex_list=['ACWT01a_Cinderella.kideval.xls','capilouto01a_Cinderella.kideval.xls','capilouto01a_Sandwich.kideval.xls',]
+def get_sex_dict(sex_list):
+    for group in sex_list:
+        normpy=open(group)
+        normap=list(csv.reader(normpy))
+        for item in normap[1:-1]:
+            print(item[0])
+            item_split=item[0].split('\t')
+            sex_dict[item_split[0][:-15]]=item_split[5]
+    return sex_dict
+    
+sex_dict=get_sex_dict(sex_list)
+
+with open('all_subject_sex.json','w') as dic:
+    json.dump(sex_dict,dic)
+        
+
+
