@@ -7,6 +7,7 @@ Created on Tue Mar 14 21:23:32 2017
 
 import json
 import numpy as np
+import collections
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.utils.np_utils import to_categorical
@@ -140,6 +141,14 @@ def trunc_pad_zero(l):
 sgra=trunc_pad_zero(sgra)
 smor=trunc_pad_zero(smor)
 
+all_subtask_label=collections.defaultdict()
+
+for dic in y:
+    for key,value in dic.items():
+        all_subtask_label[key]=value
+        
+with open('all_subtask_label.json','w') as dic:
+    json.dump(all_subtask_label,dic)
 
 
 # Vectorize the word samples into a 2D integer tensor via Keras functions
