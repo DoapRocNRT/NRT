@@ -142,5 +142,46 @@ for wav in result:
 
 with open('all_subtask_prosody.json','w') as dic:
     json.dump(pro_dict,dic)
+
+
+# Normalization
+
+with open('all_subject_sex.json', 'r') as dic:
+    sub_sex = json.load(dic)
+   
+with open('all_subtask_prosody.json', 'r') as dic:
+    pro_subtask = json.load(dic)
+
+subject=[]
+intens=[]
+pitch=[]
+sex=[]
+
+for item,k in pro_subtask.items():
+    
+    if k!=None:
+        
+        if '_Cinderella' in item and item[:-11] in sub_sex:
+            sex.append(sub_sex[item[:-11]])
+            subject.append(item)
+            pitch.append(k[0])
+            intens.append(k[1])
+        
+        if '_Sandwich' in item and item[:-9] in sub_sex:
+            sex.append(sub_sex[item[:-9]])
+            subject.append(item)
+            pitch.append(k[0])
+            intens.append(k[1])
+        
+        
+def norm(x):
+    arr_x=np.asarray(x)
+    intens_task = (arr_x-np.mean(arr_x))/np.std(arr_x)
+    return intens_task
+    
+# Normalize within each subject-task pair.    
+norm_intens=list(map(norm,intens))
+norm_pitch=list(map(norm,pitch))
+
     
 
