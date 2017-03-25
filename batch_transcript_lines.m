@@ -33,7 +33,7 @@ grammar =  {1, 'SUBJ';
             22, 'COORD';
             23, 'ROOT';
             24, 'LINK';
-            25, 'BEG';
+            % 25, 'BEG';
             26, 'BEGP';
             27, 'INCROOT';
             28, 'POSTMOD';
@@ -79,7 +79,7 @@ morphology =   {1, 'adj';
                 27, 'part';
                 28, 'aux';
                 29, 'coord';
-                30, 'beg';
+                % 30, 'beg';
                 31, 'mod';
                 32, 'cop';
                 33, 'step#n';
@@ -120,7 +120,6 @@ morphology =   {1, 'adj';
 dataDir = uigetdir();
 cd(dataDir);
 
-
 for story = 1:length(stories)
     disp(stories{story});
     cd(stories{story});
@@ -138,7 +137,7 @@ for story = 1:length(stories)
         subjFiles([subjFiles(:).isdir]) = []; % remove any directories that might be in this directory
         
         for file = 1:length(subjFiles)
-            disp(file/length(subjFiles));
+            disp([mat2str(round(file/length(subjFiles) * 100, 2)), '%']); % progress counter
             fileID = fopen(subjFiles(file).name, 'r');
             text = textscan(fileID, '%s', 5000, 'Delimiter', '\n');
             fclose(fileID);
@@ -153,139 +152,155 @@ for story = 1:length(stories)
             lineCount = 0;
             
             for line = 1:length(text{:})
-                currentLine = text{:}(line);
+                goToLine = line; % need an extra variable because we used this to check the next line but don't want to break the loop
+                currentLine = text{:}(goToLine);
                 
                 if strncmp(currentLine, '*PAR', 4)
                     lineCount = lineCount + 1;
                     overallLine = cell(6,1);
                     overallLine{1} = strcat(subjID, '_', num2str(lineCount), '_', storyID);
                     
+                    %% looking within a set of *PAR, %mor, %gra lines
                     inPar = 1; 
-                    goDownLine = 0;
                     while inPar == 1
-                        
-                        goDownLine = goDownLine + 1;
-                        nextLine = text{:}(line+goDownLine);
-                        
-                        if strncmp(nextLine, '*', 1) || strncmp(nextLine, '@', 1)
-                            inPar = 0;
-                            continue;
-                        elseif strncmp(nextLine, '%', 1)
-                            inPos = 1;
-                            posLine = nextLine;
-                            checkNextLine = 0; 
-                            
-                            while inPos == 1
-                                checkNextLine = checkNextLine + 1;
-                                next_nextLine = text{:}(line+goDownLine+checkNextLine);
-                                
-                                if strncmp(next_nextLine, '*', 1) || strncmp(next_nextLine, '%', 1) || strncmp(next_nextLine, '@', 1)
-                                    inPos = 0;
-                                    % continue;
-                                else
-                                    posLine = strcat(posLine, {' '}, next_nextLine);
-                                end
-                            end
-                            
-                            % if strncmp(nextLine, '%gra', 4) || strncmp(nextLine, '%mor', 4)
-                            %     posLine = nextLine;
-                            % else
-                            %     posLine = strcat(posLine, ' ', nextLine);
-                            % end
-                        else
-                            continue;
-                        end
-                        
-                        
-                        posParts = strsplit(posLine{:}, {' ', '\t'});
-                        if strncmp(posParts{1}, '%mor', 4); %if this is a morpheme line
-                            morph = {};
-                            morph_coded = [];
-                            word = {};
-                            
-                            for currentPart = 2:length(posParts) %loop through all the units
-                                split_posParts = strsplit(posParts{currentPart}, '|'); %split the string by the delimiter
-                                %So now I want to also take away the stuff
-                                %before and including the # sign
-                                if(strfind(split_posParts{1},'#'))
-                                    justPOS = strsplit(split_posParts{1},'#'); %just the part of speech
-                                    split_posParts{1} = justPOS{2};
-                                end
-                                
-                                if length(split_posParts) < 2
-                                    continue;
-                                else
-                                    % morph_parts = strsplit(split_posParts{1}, ':');
-                                    % morph = [morph, morph_parts{1}];
-                                    % a = strcmp(morph_parts{1},
-                                    % morphology(:,2));
-                                    morph = [morph, split_posParts{1}];
-                                    a = strcmp(split_posParts{1}, morphology(:,2));
-                                    if sum(a) == 0
-                                        disp(split_posParts{1});
-                                    end
-                                    morph_coded = [morph_coded, morphology{morphology{strcmp(split_posParts{1}, morphology(:,2))},1}];
-                                    %get rid of extra junk in the word
-                                    thisWord = split_posParts{2};     
-                                    while(strfind(thisWord, '&'))
-                                        thisWord = strsplit(split_posParts{2},'&');  
-                                        thisWord = thisWord{1};
-                                    end
-                                    if(strfind(thisWord,'-'))
-                                        thisWord = strsplit(split_posParts{2},'-');
-                                        thisWord = thisWord{1};
-                                    end
-                                    if(strfind(thisWord,'~'))
-                                        thisWord = strsplit(split_posParts{2},'~');
-                                        thisWord = thisWord{1};
-                                    end       
-                                    if(strcmp(thisWord,'beg') ... 
-                                        || strcmp(thisWord,'cm'))
-                                        thisWord = [];
-                                    end
-                                    word = [word, thisWord];
-                                end
-                            end
-                            
-                        elseif strncmp(posParts{1}, '%gra', 4)
-                            grams = {};
-                            gram_coded = [];
-                            
-                            for currentPart = 2:length(posParts)
-                                split_posParts = strsplit(posParts{currentPart}, '|');
-                                if length(split_posParts) < 2 || strcmp(split_posParts{3}, 'PUNCT')
-                                    continue;
-                                else
-                                    grams = [grams, split_posParts{3}];
-                                    a = strcmp(split_posParts{3}, grammar(:,2));
+                        word = [];
+                        morph = {}; 
+                        morph_coded = [];
+                        grams = {}; 
+                        gram_coded = [];
                                     
-                                    if strcmp(split_posParts{3}, 'END')
- %                                       pause;
-                                        % error('end found')
+                        %% pull out the words from the *PAR lines
+                        word_count = 0;
+                        
+                        inParLines = 1;
+                        while inParLines == 1
+                            currentLine = text{:}(goToLine);
+                            currentLine_split = strsplit(currentLine{:}, {' ', '\t'});
+                            
+                            if word_count > 0 && sum(strncmp(currentLine, {'*', '@', '%'}, 1)) > 0
+                                inParLines = 0;
+                                break;
+                                % disp('end');
+                            end
+
+                            for x = 1:length(currentLine_split)
+                                if isstrprop(currentLine_split{x}(1), 'punct')
+                                    continue;
+                                end
+
+                                currentWord = [];
+                                for y = 1:length(currentLine_split{x})
+                                    if isstrprop(currentLine_split{x}(y), 'punct')
+                                        currentWord = [];
+                                        break;
+                                    elseif isstrprop(currentLine_split{x}(y), 'alpha')
+                                        currentWord = [currentWord currentLine_split{x}(y)];
+                                    end
+                                end
+
+                                %% xxx is used to indicate some sort of gesture or mumbling
+                                if strcmp(currentWord,'xxx')
+                                    currentWord = [];
+                                end
+                                % disp(word);
+
+                                if ~isempty(currentWord)
+                                    word_count = word_count + 1;
+                                    word{word_count} = currentWord;
+                                end
+                            end
+                            
+                            goToLine = goToLine + 1;
+                        end                        
+                  
+                        %% pull out the parts of speech from %mor and %gra lines
+                        if strncmp(currentLine, '%', 1)
+                            inPosLines = 1;
+                            morphLine = 0;
+                            gramLine = 0;
+                            while inPosLines == 1
+                                currentLine = text{:}(goToLine);
+                                posLine_split = strsplit(currentLine{:}, {' ', '\t'});
+                                
+                                % check to see if the current line ISN'T a
+                                % continuation of the old line
+                                if sum(strncmp(currentLine, {'*', '@'}, 1)) > 0
+                                    inPosLines = 0;
+                                    break;
+                                elseif strncmp(currentLine, '%', 1)
+                                    morphLine = 0;
+                                    gramLine = 0;
+                                end
+                                
+                                if strncmp(posLine_split{1}, '%mor', 4) || morphLine == 1 % is this a morpheme line?
+                                    morphLine = morphLine + 1;
+                                    
+                                    if morphLine == 1 % if this is the first morph line (and not a continuation), then we want to eliminate the first element (%mor)
+                                        startingPosition = 2;
+                                    else
+                                        startingPosition = 1;
                                     end
                                     
-                                    if sum(a) == 0
-                                        disp(split_posParts{3});
+                                    for currentPart = startingPosition:length(posLine_split) %loop through all the units
+                                        split_posParts = strsplit(posLine_split{currentPart}, '|'); %split the string by the delimiter
+                                        %So now I want to also take away
+                                        %the stuff before and including the
+                                        %# sign
+                                        if(strfind(split_posParts{1},'#'))
+                                            justPOS = strsplit(split_posParts{1},'#'); %just the part of speech
+                                            split_posParts{1} = justPOS{2};
+                                        end
+
+                                        if length(split_posParts) < 2
+                                            continue;
+                                        else
+                                            % morph_parts =
+                                            % strsplit(split_posParts{1},
+                                            % ':'); morph = [morph,
+                                            % morph_parts{1}]; a =
+                                            % strcmp(morph_parts{1},
+                                            % morphology(:,2));
+                                            morph = [morph, split_posParts{1}];
+                                            a = strcmp(split_posParts{1}, morphology(:,2));
+                                            if sum(a) == 0
+                                                disp(split_posParts{1});
+                                            end
+                                            morph_coded = [morph_coded, morphology{morphology{strcmp(split_posParts{1}, morphology(:,2))},1}];
+                                            %get rid of extra junk in the
+                                            %word
+                                        end
                                     end
-                                    gram_coded = [gram_coded, grammar{grammar{strcmp(split_posParts{3}, grammar(:,2))},1}];
+                                elseif strncmp(posLine_split{1}, '%gra', 4) || gramLine == 1 % is this a grammar line?
+                                    gramLine = gramLine + 1;
+                                    
+                                    if gramLine == 1 % if this is the first gram line (and not a continuation), then we want to eliminate the first element (%gra)
+                                        startingPosition = 2;
+                                    else
+                                        startingPosition = 1; 
+                                    end
+                                    
+                                    for currentPart = startingPosition:length(posLine_split)
+                                        split_posParts = strsplit(posLine_split{currentPart}, '|');
+                                        if length(split_posParts) < 2 || strcmp(split_posParts{3}, 'PUNCT')
+                                            continue;
+                                        else
+                                            grams = [grams, split_posParts{3}];
+                                            a = strcmp(split_posParts{3}, grammar(:,2));
+
+                                            if strcmp(split_posParts{3}, 'END')
+                                                % error('end found')
+                                            end
+
+                                            if sum(a) == 0
+                                                disp(split_posParts{3});
+                                            end
+                                            gram_coded = [gram_coded, grammar{grammar{strcmp(split_posParts{3}, grammar(:,2))},1}];
+                                        end
+                                    end
                                 end
+                                goToLine = goToLine + 1;
                             end
-                            
                         end
-                        
-                        % for currentPart = 2:length(posParts)
-                        %     split_posParts = strsplit(posParts{currentPart}, '|');
-                        %     if length(split_posParts) == 2
-                        %         morph = [morph, split_posParts{1}];
-                        %         morph_coded = [morph_coded, morphology{morphology{strcmp(split_posParts{1}, morphology(:,2))},1}];
-                        %         word = [word, split_posParts{2}];
-                        %     elseif length(split_posParts) == 3
-                        %         if ~strcmp(split_posParts{3}, 'PUNCT')
-                        %             grams = [grams, split_posParts{3}];
-                        %             gram_coded = [gram_coded, grammar{grammar{strcmp(split_posParts{3}, grammar(:,2))},1}];
-                        %         end
-                        %     end
-                        % end
                         
                         if exist('word', 'var')
                             overallLine{2} = word;
@@ -301,6 +316,10 @@ for story = 1:length(stories)
                             overallLine{6} = gram_coded;
                         end
                         
+                        if sum(strncmp(currentLine, {'*', '@'}, 1)) > 0
+                            inPar = 0;
+                            break;
+                        end
                     end
                     
                     eval(sprintf('lines.%s = overallLine(:);', overallLine{1}{1}));
