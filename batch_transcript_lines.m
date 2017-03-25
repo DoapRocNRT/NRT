@@ -184,7 +184,11 @@ for story = 1:length(stories)
                             end
 
                             for x = 1:length(currentLine_split)
-                                if isstrprop(currentLine_split{x}(1), 'punct')
+                                try % if, for some reason, there isn't a 1st character present in a cell
+                                    if isstrprop(currentLine_split{x}(1), 'punct')
+                                        continue;
+                                    end
+                                catch
                                     continue;
                                 end
 
@@ -211,6 +215,9 @@ for story = 1:length(stories)
                             end
                             
                             goToLine = goToLine + 1;
+                            if goToLine > length(text{:})
+                                break;
+                            end
                         end                        
                   
                         %% pull out the parts of speech from %mor and %gra lines
@@ -262,9 +269,10 @@ for story = 1:length(stories)
                                             % morphology(:,2));
                                             morph = [morph, split_posParts{1}];
                                             a = strcmp(split_posParts{1}, morphology(:,2));
-                                            if sum(a) == 0
-                                                disp(split_posParts{1});
-                                            end
+                                            % if sum(a) == 0 % print out
+                                            % any  missing morph options
+                                            %     disp(split_posParts{1});
+                                            % end
                                             morph_coded = [morph_coded, morphology{morphology{strcmp(split_posParts{1}, morphology(:,2))},1}];
                                             %get rid of extra junk in the
                                             %word
@@ -291,14 +299,19 @@ for story = 1:length(stories)
                                                 % error('end found')
                                             end
 
-                                            if sum(a) == 0
-                                                disp(split_posParts{3});
-                                            end
+                                            % if sum(a) == 0 % print out
+                                            % any missing gram options
+                                            %     disp(split_posParts{3});
+                                            % end
                                             gram_coded = [gram_coded, grammar{grammar{strcmp(split_posParts{3}, grammar(:,2))},1}];
                                         end
                                     end
                                 end
+                                
                                 goToLine = goToLine + 1;
+                                if goToLine > length(text{:})
+                                    break;
+                                end
                             end
                         end
                         
