@@ -49,14 +49,16 @@ for item,k in pro_subtask.items():
             intens.append(k[1])
             label.append(all_subtask_label[item])
         
-def norm(x):
-    arr_x=np.asarray(x)
-    intens_task = (arr_x-np.mean(arr_x))/np.std(arr_x)
-    return intens_task
+def normalize(p):
+    arr_p=np.asarray(p)
+    arr_p[arr_p!=0]=(arr_p[arr_p!=0]-np.mean(arr_p[arr_p!=0]))/np.std(arr_p[arr_p!=0])
+    return arr_p
     
     
-norm_intens=list(map(norm,intens))
-norm_pitch=list(map(norm,pitch))
+norm_intens=list(map(normalize,intens))
+norm_pitch=list(map(normalize,pitch))
+
+
 
 
 
