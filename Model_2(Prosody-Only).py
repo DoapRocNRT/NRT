@@ -13,7 +13,7 @@ from keras.layers import Dense, Input, Flatten, Dropout, Activation, Merge
 from keras.layers import Convolution1D, MaxPooling1D, Embedding, Reshape
 from keras.models import Model
 from keras.layers.recurrent import LSTM
-np.random.seed(2017)
+np.random.seed(2018)
 
 with open('all_subtask_prosody.json', 'r') as dic:
     pro_subtask = json.load(dic)
