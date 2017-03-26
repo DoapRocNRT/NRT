@@ -5,7 +5,6 @@ Created on Sat Mar 25 15:31:21 2017
 @author: weilun
 """
 
-
 import json
 import numpy as np
 from keras.utils.np_utils import to_categorical
