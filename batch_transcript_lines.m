@@ -185,18 +185,40 @@ for story = 1:length(stories)
 
                             for x = 1:length(currentLine_split)
                                 try % if, for some reason, there isn't a 1st character present in a cell
-                                    if isstrprop(currentLine_split{x}(1), 'punct')
+                                    if isstrprop(currentLine_split{x}(1), 'punct') 
                                         continue;
                                     end
                                 catch
                                     continue;
                                 end
-
+                                %Oh and we ALSO need to ignore a
+                                %word if it PRECEEDS a '[:' because
+                                %the transcript only takes the word
+                                %within the [: word]
+                                if(x<length(currentLine_split)) %we're not at the end yet AND
+                                    if(strcmp(currentLine_split{x+1},'[:')) %the next word is '[:', meaning it's gonna replace this one
+                                        continue;
+                                    end
+                                end
+                                
                                 currentWord = [];
                                 for y = 1:length(currentLine_split{x})
                                     if isstrprop(currentLine_split{x}(y), 'punct')
-                                        currentWord = [];
-                                        break;
+                                        punctOK = 0; %not okay to have punct in the word
+                                        %BUT WAIT. IF
+                                        if(y==length(currentLine_split{x})) %this is the last character AND
+                                           if(strcmp(currentLine_split{x}(y), ']')) %it's a ']' AND
+                                                if(x>1) %this word has a word before it AND
+                                                    if(strcmp(currentLine_split{x-1},'[:')) %that word is a '[:', THEN
+                                                       punctOK = 1; %we will keep this word even though it has punct in it
+                                                    end
+                                                end
+                                           end
+                                        end
+                                        if(~punctOK)
+                                            currentWord = [];
+                                            break;
+                                        end                                       
                                     elseif isstrprop(currentLine_split{x}(y), 'alpha')
                                         currentWord = [currentWord currentLine_split{x}(y)];
                                     end
@@ -371,4 +393,3 @@ for story = 1:length(stories)
     
     cd ..
 end
-
