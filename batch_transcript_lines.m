@@ -132,7 +132,7 @@ for story = 1:length(stories)
         disp(groupDirs(group).name);
         cd(groupDirs(group).name)
         
-        subjFiles = dir();
+        subjFiles = dir('*cha');
         subjFiles(strncmp('.', {subjFiles.name}, 1)) = []; % remove hidden directories
         subjFiles([subjFiles(:).isdir]) = []; % remove any directories that might be in this directory
         
