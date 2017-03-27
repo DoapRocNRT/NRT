@@ -214,6 +214,8 @@ for story = 1:length(stories)
                                                     end
                                                 end
                                            end
+                                        elseif(strcmp(currentLine_split{x}(y),''''))
+                                            currentWord = [currentWord currentLine_split{x}(y)];
                                         end
                                         if(~punctOK)
                                             currentWord = [];
@@ -249,7 +251,7 @@ for story = 1:length(stories)
                             gramLine = 0;
                             while inPosLines == 1
                                 currentLine = text{:}(goToLine);
-                                posLine_split = strsplit(currentLine{:}, {' ', '\t'});
+                                posLine_split = strsplit(currentLine{:}, {' ', '\t', '~'});
                                 
                                 % check to see if the current line ISN'T a
                                 % continuation of the old line
