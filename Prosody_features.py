@@ -66,6 +66,7 @@ def getPitchIntensity(inputfile):
         output = np.empty([2,nf])
         while i < nf:
                 wavseg = wav[100*sf*i/1000:100*sf*(i+1)/1000,]
+		# The following five lines of code were adopted from http://obogason.com/fundamental-frequency-estimation-and-machine-learning/
                 # Define windows
                 n = len(wavseg)
                 windowed = wavseg*bmh(n)
